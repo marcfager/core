@@ -106,7 +106,31 @@ class GasSourceType(TypedDict):
     number_energy_price: float | None  # Price for energy ($/m³)
 
 
-SourceType = Union[GridSourceType, SolarSourceType, BatterySourceType, GasSourceType]
+class DistrictheatingSourceType(TypedDict):
+    """Dictionary holding the source of district heating storage."""
+
+    type: Literal["districtheating"]
+
+    stat_energy_from: str
+
+    # statistic_id of costs ($) incurred from the energy meter
+    # If set to None and entity_energy_from and entity_energy_price are configured,
+    # an EnergyCostSensor will be automatically created
+    stat_cost: str | None
+
+    # Used to generate costs if stat_cost is set to None
+    entity_energy_from: str | None  # entity_id of an district heating meter (kWh), entity_id of the district heating meter for stat_energy_from
+    entity_energy_price: str | None  # entity_id of an entity providing price ($/kWh)
+    number_energy_price: float | None  # Price for energy ($/kWh)
+
+
+SourceType = Union[
+    GridSourceType,
+    SolarSourceType,
+    BatterySourceType,
+    GasSourceType,
+    DistrictheatingSourceType,
+]
 
 
 class DeviceConsumption(TypedDict):
@@ -221,6 +245,16 @@ GAS_SOURCE_SCHEMA = vol.Schema(
         vol.Optional("number_energy_price"): vol.Any(vol.Coerce(float), None),
     }
 )
+DISTRICTHEATING_SOURCE_SCHEMA = vol.Schema(
+    {
+        vol.Required("type"): "districtheating",
+        vol.Required("stat_energy_from"): str,
+        vol.Optional("stat_cost"): vol.Any(str, None),
+        vol.Optional("entity_energy_from"): vol.Any(str, None),
+        vol.Optional("entity_energy_price"): vol.Any(str, None),
+        vol.Optional("number_energy_price"): vol.Any(vol.Coerce(float), None),
+    }
+)
 
 
 def check_type_limits(value: list[SourceType]) -> list[SourceType]:
@@ -243,6 +277,7 @@ ENERGY_SOURCE_SCHEMA = vol.All(
                     "solar": SOLAR_SOURCE_SCHEMA,
                     "battery": BATTERY_SOURCE_SCHEMA,
                     "gas": GAS_SOURCE_SCHEMA,
+                    "districtheating": DISTRICTHEATING_SOURCE_SCHEMA,
                 },
             )
         ]

@@ -388,6 +388,21 @@ async def async_validate(hass: HomeAssistant) -> EnergyPreferencesValidation:
                 )
             )
 
+        elif source["type"] == "districtheating":
+            wanted_statistics_metadata.add(source["stat_energy_from"])
+            validate_calls.append(
+                functools.partial(
+                    _async_validate_usage_stat,
+                    hass,
+                    statistics_metadata,
+                    source["stat_energy_from"],
+                    ENERGY_USAGE_DEVICE_CLASSES,
+                    ENERGY_USAGE_UNITS,
+                    ENERGY_UNIT_ERROR,
+                    source_result,
+                )
+            )
+
             if source.get("stat_cost") is not None:
                 wanted_statistics_metadata.add(source["stat_cost"])
                 validate_calls.append(
@@ -406,8 +421,8 @@ async def async_validate(hass: HomeAssistant) -> EnergyPreferencesValidation:
                         hass,
                         source["entity_energy_price"],
                         source_result,
-                        GAS_PRICE_UNITS,
-                        GAS_PRICE_UNIT_ERROR,
+                        ENERGY_PRICE_UNITS,
+                        ENERGY_PRICE_UNIT_ERROR,
                     )
                 )
 

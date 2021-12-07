@@ -68,7 +68,7 @@ T = TypeVar("T")
 class SourceAdapter:
     """Adapter to allow sources and their flows to be used as sensors."""
 
-    source_type: Literal["grid", "gas"]
+    source_type: Literal["grid", "gas", "districtheating"]
     flow_type: Literal["flow_from", "flow_to", None]
     stat_energy_key: Literal["stat_energy_from", "stat_energy_to"]
     entity_energy_key: Literal["entity_energy_from", "entity_energy_to"]
@@ -98,6 +98,15 @@ SOURCE_ADAPTERS: Final = (
     ),
     SourceAdapter(
         "gas",
+        None,
+        "stat_energy_from",
+        "entity_energy_from",
+        "stat_cost",
+        "Cost",
+        "cost",
+    ),
+    SourceAdapter(
+        "districtheating",
         None,
         "stat_energy_from",
         "entity_energy_from",
@@ -314,7 +323,10 @@ class EnergyCostSensor(SensorEntity):
 
         energy_unit = energy_state.attributes.get(ATTR_UNIT_OF_MEASUREMENT)
 
-        if self._adapter.source_type == "grid":
+        if (
+            self._adapter.source_type == "grid"
+            or self._adapter.source_type == "districtheating"
+        ):
             if energy_unit not in VALID_ENERGY_UNITS:
                 energy_unit = None
 
